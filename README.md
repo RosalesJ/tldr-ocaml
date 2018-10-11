@@ -1,1 +1,2 @@
-tldr-ocaml: a client for [https://github.com/tldr-pages][tldr] written in ocaml
+# tldr-ocaml
+A client for [tldr](https://github.com/tldr-pages/tldr) written in ```ocaml```.
