@@ -1,6 +1,6 @@
 build:
-		dune build tldr.exe
-		cp ./_build/default/tldr.exe ./tldr
+		dune build src/tldr.exe
+		cp ./_build/default/src/tldr.exe ./tldr
 	  chmod 755 tldr
 
 clean:
