@@ -1,0 +1,14 @@
+opam-version: "1.2"
+version: "0.1"
+maintainer: "coby@case.edu"
+authors: ["Jacob Rosales Chase <coby@case.edu>"]
+license: "MIT"
+build: [
+  ["jbuilder" "build" "--only-packages" "tldr-ocaml" "--root" "." "-j" jobs "@install"]
+]
+depends: [
+  "jbuilder"
+  "core"
+]
+available: [ ocaml-version >= "4.03.0" ]
+descr: "A tldr client in ocaml"

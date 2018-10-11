@@ -1,0 +1,4 @@
+(executable
+  (name tldr)
+  (libraries core terminal_size bos lwt cohttp cohttp-lwt cohttp-lwt-unix ssl)
+  (preprocess (pps ppx_jane)))
