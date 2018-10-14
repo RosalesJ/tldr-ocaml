@@ -2,10 +2,11 @@ open Core
 open Common
 
 
-let no_documentation =
-  Printf.sprintf "`%s` documentation is not available. \n Consider contributing Pull Request to https://github.com/tldr-pages/tldr"
 
-let display page = Printf.printf "%s" page
+let no_documentation =
+  Printf.sprintf "`%s` documentation is not available. \n Consider contributing Pull Request to https://github.com/tldr-pages/tldr\n"
+
+let display = Display.display
 
 let display_page command platform =
   let rec retrieve command platform =

@@ -1,9 +1,12 @@
 opam-version: "2.0"
 version: "0.0.1"
 maintainer: "coby@case.edu"
+homepage: "https://github.com/RosalesJ/tldr-ocaml"
+bug-reports: "https://github.com/RosalesJ/tldr-ocaml/issues"          
 authors: ["Jacob Rosales Chase <coby@case.edu>"]
 license: "MIT"
 build: [[make] [make "install"]]
+descr: "A tldr client in ocaml"    
 depends: [
   "dune"
   "core"
@@ -14,7 +17,5 @@ depends: [
   "cohttp"
   "cohttp-lwt-unix"
   "lwt_ssl"
-  "ssl" {= "0.5.5"}
-]
-available: [ ocaml-version >= "4.03.0" ]
-descr: "A tldr client in ocaml"
+  "ssl" {= "0.5.5"}]
+
