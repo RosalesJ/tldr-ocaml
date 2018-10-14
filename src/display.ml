@@ -50,17 +50,21 @@ module Parser = struct
     | Error msg -> failwith msg
 end
 
+
 let color_example = function
-  | Parser.Command com -> printf [red] "%s" com
-  | Parser.Argument arg -> printf [blue] "%s" arg
+  | Parser.Command com  -> sprintf [red] "%s" com
+  | Parser.Argument arg -> sprintf [blue] "%s" arg
 
 let color_display = function
-  | Parser.Title title          -> printf [white; Bold] "\n%s\n\n" title
-  | Parser.Description descr  -> printf [white] "%s\n" descr
-  | Parser.Example (ex, body) -> printf [green] "\n%s\n    " ex;
-                                 List.iter ~f:color_example body;
-                                 Out_channel.newline stdout
-
+  | Parser.Title title        -> sprintf [white; Bold] "\n%s\n\n" title
+  | Parser.Description descr  -> sprintf [white] "%s\n" descr
+  | Parser.Example (ex, body) -> sprintf [green] "\n%s\n    %s\n" ex
+                                   (body
+                                    |> List.map ~f:color_example
+                                    |> String.concat)
+                               
 let display page =
   Parser.parse page
-  |> List.iter ~f:color_display 
+  |> List.map ~f:color_display
+  |> String.concat
+  |> Printf.printf "%s"
