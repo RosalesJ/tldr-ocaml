@@ -26,3 +26,4 @@ depends: [
   "ANSITerminal"
   "angstrom"
 ]
+available: [ocaml >= "4.04"]
