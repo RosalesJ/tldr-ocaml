@@ -9,7 +9,7 @@ dev-repo: "git+https://github.com/RosalesJ/tldr-ocaml.git"
 version: "0.1"
 build: [
   ["dune" "subst"] {pinned}
-  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "build" "@install"]
 ]
 
 depends: [
@@ -26,4 +26,3 @@ depends: [
   "ANSITerminal"
   "angstrom"
 ]
-available: [ocaml >= "4.04"]
