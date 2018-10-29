@@ -1,4 +1,5 @@
 # tldr-ocaml
+[![Build Status](https://travis-ci.org/RosalesJ/tldr-ocaml.svg?branch=master)](https://travis-ci.org/RosalesJ/tldr-ocaml)
 A client for [tldr](https://github.com/tldr-pages/tldr) written in ```ocaml```.
 
 ![tldr screenshot](screenshot.png)
