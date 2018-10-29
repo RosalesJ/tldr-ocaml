@@ -1,12 +1,16 @@
 opam-version: "2.0"
+name: "tldr"
+synopsis: "An ocaml tldr client"
+version: "0.1"
+
 maintainer: "coby@case.edu"
 authors: ["Jacob Rosales Chase <coby@case.edu>"]
 license: "MIT"
-name: "tldr"         
+
 homepage: "https://github.com/RosalesJ/tldr-ocaml/"
 bug-reports: "https://github.com/RosalesJ/tldr-ocaml/issues"
 dev-repo: "git+https://github.com/RosalesJ/tldr-ocaml.git"
-version: "0.1"
+
 build: [
   ["dune" "subst"] {pinned}
   ["dune" "build" "@install"]
@@ -18,9 +22,9 @@ depends: [
   "ppx_jane"
   "terminal_size"
   "bos"
-  "cohttp"
+  "cohttp-lwt-unix"
   "lwt_ssl"
-  "ssl" {= "0.5.5"}
+  "ssl" {<= "0.5.5"}
   "ANSITerminal"
   "angstrom"
 ]
