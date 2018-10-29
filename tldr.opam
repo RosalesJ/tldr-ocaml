@@ -15,12 +15,10 @@ build: [
 depends: [
   "dune" {build}
   "core"
-  "lwt"
   "ppx_jane"
   "terminal_size"
   "bos"
   "cohttp"
-  "cohttp-lwt-unix"
   "lwt_ssl"
   "ssl" {= "0.5.5"}
   "ANSITerminal"
