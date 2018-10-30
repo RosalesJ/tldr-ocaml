@@ -23,7 +23,7 @@ depends: [
   "bos"
   "cohttp-lwt-unix"
   "lwt_ssl"
-  "ssl" {<= "0.5.5"}
   "ANSITerminal"
   "angstrom"
 ]
+conflicts: [ "ssl" {= "0.5.6"} ]
