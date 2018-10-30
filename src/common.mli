@@ -1,18 +1,15 @@
 open Core
 
+type t =
+  | Error of string
+  | Success of string
+  | Missing   
+
 module Environment : sig
   val system : String.t
-
-  val rows : Int.t
-
-  val columns : Int.t
 end
 
 module Cache : sig
-  type t =
-    | Miss
-    | Timeout
-    | Hit of string
 
   (* Currently unused *)
   val download_location : String.t
@@ -34,11 +31,6 @@ module Cache : sig
 end
 
 module Remote : sig
-  type t =
-    | Success of string
-    | Missing
-    | Error
-
   (* An address to the files *)
   val default_remote : String.t
 
@@ -54,3 +46,4 @@ module Remote : sig
     String.t -> t
 end
 
+val get_page : String.t -> String.t -> t

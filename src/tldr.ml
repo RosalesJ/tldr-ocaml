@@ -8,19 +8,10 @@ let no_documentation =
 let display = Display.display
 
 let display_page command platform =
-  let rec retrieve command platform =
-    match Cache.load_page command platform with
-    | Hit contents -> contents
-    | _ -> 
-      match Remote.get_page command ~platform:platform with
-      | Missing when platform = "common" -> no_documentation command
-      | Missing -> retrieve command "common"
-      | Error -> "Error: Could not reach server or something"
-      | Success contents ->
-        Common.Cache.store_page contents command platform;
-        contents
-  in
-  display (retrieve command platform)
+  match get_page command platform with
+  | Missing -> printf "%s" (no_documentation command)
+  | Error e -> printf "%s" e
+  | Success page -> display page
 
 
 let () =
@@ -36,7 +27,7 @@ let () =
 
         fun () ->
           if command = [] then
-            printf "Please enter a command\n"
+            printf "tldr\n\nSimplified man pages\n\nUsage: tldr <command> \nFor more info run: tldr -help\n"
           else
             let command = String.concat ~sep:"-" command in
             ignore update_cache;

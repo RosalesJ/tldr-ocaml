@@ -7,13 +7,7 @@ type t =
   | Error of string
   | Success of string
   | Missing
-
-let (<|>) first second =
-  match first with
-  | Missing -> Lazy.force second
-  | x -> x
-               
-
+  
 module Environment = struct
   let system =
     match Sys.os_type with
@@ -29,13 +23,11 @@ module Environment = struct
 end
 
 module Cache = struct
-  
   let download_location = "https://tldr-pages.github.io/assets/tldr.zip"
   
   let use_cache =
-    match Sys.getenv "TLDR_CACHE_ENABLED" with
-    | Some "1" -> true
-    | _        -> false
+    Sys.getenv "TLDR_CACHE_ENABLED"
+    |> (Option.value_map ~default:true ~f:(function "1" -> true | _ -> false))
 
   let max_age =
     Sys.getenv "TLDR_MAX_CACHE_AGE"
@@ -78,7 +70,6 @@ end
 
 
 module Remote = struct
-  
   let default_remote = "https://raw.githubusercontent.com/tldr-pages/tldr/master/pages"
 
   let get_page_url ?(remote = default_remote) ?(platform = Environment.system) command =
@@ -96,3 +87,17 @@ module Remote = struct
     in
     Lwt_main.run request
 end
+
+let (<|>) first second =
+  match first with
+  | Missing -> Lazy.force second
+  | x -> x
+
+
+let get_page command platform =
+  Cache.load_page command "common"
+  <|> lazy (Cache.load_page command platform)
+  <|> lazy (Remote.get_page command ~platform:"common")
+  <|> lazy (Remote.get_page command ~platform:platform)
+  <|> lazy (Missing)
+
