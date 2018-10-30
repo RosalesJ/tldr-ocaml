@@ -2,7 +2,6 @@ open Core
 open Common
 
 
-
 let no_documentation =
   Printf.sprintf "`%s` documentation is not available. \n Consider contributing Pull Request to https://github.com/tldr-pages/tldr\n"
 

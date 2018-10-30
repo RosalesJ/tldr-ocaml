@@ -3,6 +3,17 @@ open Lwt
 open Cohttp    
 open Cohttp_lwt_unix
 
+type t =
+  | Error of string
+  | Success of string
+  | Missing
+
+let (<|>) first second =
+  match first with
+  | Missing -> Lazy.force second
+  | x -> x
+               
+
 module Environment = struct
   let system =
     match Sys.os_type with
@@ -15,21 +26,9 @@ module Environment = struct
         | _  -> "linux")
     | "Win32" -> "windows"
     | _ -> "common"
-      
-  let rows = match Terminal_size.get_rows () with
-    | Some n -> n
-    | None -> 25
-
-  let columns = match Terminal_size.get_columns () with
-    | Some n -> n
-    | None -> 80
 end
 
 module Cache = struct
-  type t =
-    | Miss
-    | Timeout
-    | Hit of string
   
   let download_location = "https://tldr-pages.github.io/assets/tldr.zip"
   
@@ -39,9 +38,8 @@ module Cache = struct
     | _        -> false
 
   let max_age =
-    match Sys.getenv "TLDR_MAX_CACHE_AGE" with
-    | Some n -> Float.of_string n
-    | None   -> 24.
+    Sys.getenv "TLDR_MAX_CACHE_AGE"
+    |> Option.value_map ~default:24. ~f:Float.of_string
 
   let directory =
     let open Filename in
@@ -65,25 +63,21 @@ module Cache = struct
       and cache_epoch = max_age *. 60. *. 60. *. 24. 
       and cur_time = Unix.time () in
       if cur_time -. last_modified > cache_epoch then
-        Timeout
+        Missing
       else
-        Hit (In_channel.read_all file)
-    else 
-      Miss
+        Success (In_channel.read_all file)
+    else
+      Missing
 
   let store_page page command platform =
     let file_path = (get_file_path command platform) in
     if directory |> Fpath.v |> Bos.OS.File.exists = Result.Ok false then
       ignore (Bos.OS.Dir.create (directory |> Fpath.v));
-    Out_channel.write_all file_path ~data:page  
+    Out_channel.write_all file_path ~data:page
 end
 
 
 module Remote = struct
-  type t =
-    | Success of string
-    | Missing
-    | Error
   
   let default_remote = "https://raw.githubusercontent.com/tldr-pages/tldr/master/pages"
 
@@ -98,7 +92,7 @@ module Remote = struct
       match code with
       | 200 -> Success body
       | 404 -> Missing
-      | _   -> Error
+      | _   -> Error "There was an error with connection"
     in
     Lwt_main.run request
 end

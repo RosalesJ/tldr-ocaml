@@ -20,7 +20,6 @@ depends: [
   "dune" {build}
   "core"
   "ppx_jane"
-  "terminal_size"
   "bos"
   "cohttp-lwt-unix"
   "lwt_ssl"
