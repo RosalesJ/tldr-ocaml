@@ -13,7 +13,7 @@ dev-repo: "git+https://github.com/RosalesJ/tldr-ocaml.git"
 
 build: [
   ["dune" "subst"] {pinned}
-  ["dune" "build" "@install"]
+  ["dune" "build" "-p" name "-j" jobs]
 ]
 
 depends: [
