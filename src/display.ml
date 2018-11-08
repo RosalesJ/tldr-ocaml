@@ -18,11 +18,10 @@ module Parser = struct
   let _command c     = Command c
   let _argument a    = Argument a
 
-  let is_eol = function | '\n' | '\r' -> true | _ -> false
-  let is_command = function | '{' | '`' -> false | _ -> true
-  let not_brace = function | '{' | '}' -> false | _ -> true
+  let is_eol   = function '\n' | '\r' -> true  | _ -> false
+  let is_command = function '{' | '`' -> false | _ -> true
+  let not_brace  = function '{' | '}' -> false | _ -> true
 
-  let eol    = string "\n" <|> string "\r\n"
   let tstart = string "# "
   let dstart = string "> "
   let estart = string "- "
@@ -55,7 +54,7 @@ let color_example = function
   | Parser.Command com  -> sprintf [red] "%s" com
   | Parser.Argument arg -> sprintf [blue] "%s" arg
 
-let color_display = function
+let color_expression = function
   | Parser.Title title        -> sprintf [white; Bold] "%s\n\n" title
   | Parser.Description descr  -> sprintf [white] "%s\n" descr
   | Parser.Example (ex, body) -> sprintf [green] "\n%s\n  %s\n" ex
@@ -65,6 +64,6 @@ let color_display = function
                                
 let display page =
   Parser.parse page
-  |> List.map ~f:color_display
+  |> List.map ~f:color_expression
   |> String.concat
   |> Printf.printf "%s"
