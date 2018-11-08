@@ -27,7 +27,7 @@ module Cache = struct
   
   let use_cache =
     Sys.getenv "TLDR_CACHE_ENABLED"
-    |> Option.value_map ~default:true ~f:(function "1" -> true | _ -> false)
+    |> Option.value_map ~default:true ~f:(function "0" -> false | _ -> true)
 
   let max_age =
     Sys.getenv "TLDR_MAX_CACHE_AGE"

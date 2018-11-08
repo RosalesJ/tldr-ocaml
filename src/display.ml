@@ -56,9 +56,9 @@ let color_example = function
   | Parser.Argument arg -> sprintf [blue] "%s" arg
 
 let color_display = function
-  | Parser.Title title        -> sprintf [white; Bold] "\n%s\n\n" title
+  | Parser.Title title        -> sprintf [white; Bold] "%s\n\n" title
   | Parser.Description descr  -> sprintf [white] "%s\n" descr
-  | Parser.Example (ex, body) -> sprintf [green] "\n%s\n    %s\n" ex
+  | Parser.Example (ex, body) -> sprintf [green] "\n%s\n  %s\n" ex
                                    (body
                                     |> List.map ~f:color_example
                                     |> String.concat)
