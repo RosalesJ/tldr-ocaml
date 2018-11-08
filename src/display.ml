@@ -89,11 +89,11 @@ module Colors = struct
 
   let color_example =
     (* This is all to deal with underlined spaces looking weird*)
-    let color x style = x
-                        |> String.split ~on:' '
-                        |> List.map ~f:(function "" -> ""
-                                                | x -> sprintf style "%s" x)
-                        |> String.concat ~sep:" "
+    let color x style =
+      x
+      |> String.split ~on:' '
+      |> List.map ~f:(function "" -> "" | x -> sprintf style "%s" x)
+      |> String.concat ~sep:" "
     in
     function
     | Parser.Command command  -> color command command_style
@@ -104,13 +104,14 @@ module Colors = struct
     | Parser.Title title        -> sprintf title_style "%s\n\n" title
     | Parser.Description descr  -> sprintf description_style "%s\n" descr
     | Parser.Example (ex, body) -> sprintf example_style "\n%s\n" ex
-                                   ^ sprintf [default] "  "
+                                   ^ "  "
                                    ^ (List.map ~f:color_example body
                                       |> String.concat)
+                                   ^ "\n"
 end
                                
 let display page =
   Parser.parse page
   |> List.map ~f:Colors.color_expression
   |> String.concat 
-  |> Printf.printf "%s\n"
+  |> Printf.printf "%s"
