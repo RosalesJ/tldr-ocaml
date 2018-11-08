@@ -68,7 +68,6 @@ module Colors = struct
     | "on_magenta" -> on_magenta
     | "on_cyan"    -> on_cyan
     | "on_white"   -> on_white
-    | "reset"      -> Reset
     | "bold"       -> Bold
     | "underlined" -> Underlined
     | "blink"      -> Blink
