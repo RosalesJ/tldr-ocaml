@@ -50,20 +50,67 @@ module Parser = struct
 end
 
 
-let color_example = function
-  | Parser.Command com  -> sprintf [red] "%s" com
-  | Parser.Argument arg -> sprintf [blue] "%s" arg
+module Colors = struct
+  let string_of_style = function
+    | "black"      -> black
+    | "red"        -> red
+    | "green"      -> green
+    | "yellow"     -> yellow
+    | "blue"       -> blue
+    | "magenta"    -> magenta
+    | "cyan"       -> cyan
+    | "white"      -> white
+    | "on_black"   -> on_black
+    | "on_red"     -> on_red
+    | "on_green"   -> on_green
+    | "on_yellow"  -> on_yellow
+    | "on_blue"    -> on_blue
+    | "on_magenta" -> on_magenta
+    | "on_cyan"    -> on_cyan
+    | "on_white"   -> on_white
+    | "reset"      -> Reset
+    | "bold"       -> Bold
+    | "underlined" -> Underlined
+    | "blink"      -> Blink
+    | _            -> default
 
-let color_expression = function
-  | Parser.Title title        -> sprintf [white; Bold] "%s\n\n" title
-  | Parser.Description descr  -> sprintf [white] "%s\n" descr
-  | Parser.Example (ex, body) -> sprintf [green] "\n%s\n  %s\n" ex
-                                   (body
-                                    |> List.map ~f:color_example
-                                    |> String.concat)
+  let color_from_environment env default =
+    let f string = String.split ~on:';' string
+                   |> List.map ~f:string_of_style
+    in
+    Sys.getenv env
+    |> Option.value_map ~default:default ~f:f
+
+  let command_style = color_from_environment "TLDR_COLOR_COMMAND" [red]
+  let argument_style = color_from_environment "TLDR_COLOR_ARGUMENT" [blue]
+  let title_style = color_from_environment "TLDR_COLOR_TITLE" [white; Bold]
+  let description_style = color_from_environment "TLDR_COLOR_DESCRIPTION" [white]
+  let example_style = color_from_environment "TLDR_COLOR_EXAMPLE" [green]
+
+  let color_example =
+    (* This is all to deal with underlined spaces looking weird*)
+    let color x style = x
+                        |> String.split ~on:' '
+                        |> List.map ~f:(function "" -> ""
+                                                | x -> sprintf style "%s" x)
+                        |> String.concat ~sep:" "
+    in
+    function
+    | Parser.Command command  -> color command command_style
+    | Parser.Argument argument -> color argument argument_style
+
+
+  let color_expression = function
+    | Parser.Title title        -> sprintf title_style "%s\n\n" title
+    | Parser.Description descr  -> sprintf description_style "%s\n" descr
+    | Parser.Example (ex, body) -> sprintf example_style "\n%s\n" ex
+                                   ^ sprintf [default] "  "
+                                   ^ (List.map ~f:color_example body
+                                      |> String.concat)
+end
                                
 let display page =
   Parser.parse page
-  |> List.map ~f:color_expression
-  |> String.concat
-  |> Printf.printf "%s"
+  |> List.map ~f:Colors.color_expression
+  |> String.concat 
+  |> Printf.printf "%s\n"

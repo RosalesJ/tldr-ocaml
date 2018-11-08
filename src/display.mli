@@ -11,10 +11,11 @@ module Parser : sig
   val parse : String.t -> expression list
 end
 
-val color_example : Parser.example -> string
+module Colors : sig
+  val color_example : Parser.example -> String.t
   
-val color_expression : Parser.expression -> string
-  
-val display : string -> Base.unit
+  val color_expression : Parser.expression -> String.t
+end
 
-                                        
+  
+val display : string -> Base.unit                                        
