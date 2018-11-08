@@ -27,7 +27,7 @@ module Cache = struct
   
   let use_cache =
     Sys.getenv "TLDR_CACHE_ENABLED"
-    |> (Option.value_map ~default:true ~f:(function "1" -> true | _ -> false))
+    |> Option.value_map ~default:true ~f:(function "1" -> true | _ -> false)
 
   let max_age =
     Sys.getenv "TLDR_MAX_CACHE_AGE"
@@ -81,7 +81,9 @@ module Remote = struct
       let code = resp |> Response.status |> Code.code_of_status in
       body |> Cohttp_lwt.Body.to_string >|= fun body ->
       match code with
-      | 200 -> Success body
+      | 200 -> if Cache.use_cache then
+                 Cache.store_page body command platform;
+               Success body
       | 404 -> Missing
       | _   -> Error "There was an error with connection"
     in
@@ -99,5 +101,4 @@ let get_page command platform =
   <|> lazy (Cache.load_page command platform)
   <|> lazy (Remote.get_page command ~platform:"common")
   <|> lazy (Remote.get_page command ~platform:platform)
-  <|> lazy (Missing)
 
