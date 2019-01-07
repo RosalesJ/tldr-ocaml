@@ -1,13 +1,13 @@
 open Core
-open Lwt    
-open Cohttp    
+open Lwt
+open Cohttp
 open Cohttp_lwt_unix
 
 type t =
   | Error of string
   | Success of string
   | Missing
-  
+
 module Environment = struct
   let system =
     match Sys.os_type with
@@ -24,7 +24,7 @@ end
 
 module Cache = struct
   let download_location = "https://tldr-pages.github.io/assets/tldr.zip"
-  
+
   let use_cache =
     Sys.getenv "TLDR_CACHE_ENABLED"
     |> Option.value_map ~default:true ~f:(function "0" -> false | _ -> true)
@@ -49,10 +49,10 @@ module Cache = struct
   let load_page command platform =
     let file = get_file_path command platform in
     let exists = file |> Fpath.v |> Bos.OS.File.exists in
-    
+
     if use_cache && exists = Result.Ok true then
-      let last_modified = (Unix.stat file).st_mtime 
-      and cache_epoch = max_age *. 60. *. 60. *. 24. 
+      let last_modified = (Unix.stat file).st_mtime
+      and cache_epoch = max_age *. 60. *. 60. *. 24.
       and cur_time = Unix.time () in
       if cur_time -. last_modified > cache_epoch then
         Missing
@@ -101,4 +101,3 @@ let get_page command platform =
   <|> lazy (Cache.load_page command platform)
   <|> lazy (Remote.get_page command ~platform:"common")
   <|> lazy (Remote.get_page command ~platform:platform)
-

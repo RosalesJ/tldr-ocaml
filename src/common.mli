@@ -3,7 +3,7 @@ open Core
 type t =
   | Error of string
   | Success of string
-  | Missing   
+  | Missing
 
 module Environment : sig
   val system : String.t

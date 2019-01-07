@@ -1,12 +1,12 @@
 open Core
 open Angstrom
 open ANSITerminal
-   
+
 module Parser = struct
   type example =
     | Command of string
     | Argument of string
-  
+
   type expression =
     | Title of string
     | Description of string
@@ -40,7 +40,7 @@ module Parser = struct
     let head = (^) <$> estart <*> take_line <* newlines in
     let body = tick *> many (command <|> argument) <* tick in
     _example <$> head <*> body
-                  
+
   let form = newlines *> (title <|> description <|> example) <* newlines
 
   let parse page =
@@ -108,9 +108,9 @@ module Colors = struct
                                       |> String.concat)
                                    ^ "\n"
 end
-                               
+
 let display page =
   Parser.parse page
   |> List.map ~f:Colors.color_expression
-  |> String.concat 
+  |> String.concat
   |> Printf.printf "%s"
