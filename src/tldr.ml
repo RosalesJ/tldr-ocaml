@@ -10,10 +10,8 @@ let display_page command platform =
   >>| (function
        | Missing -> no_documentation command
        | Error e -> e
-       | Success page -> page)
+       | Success page -> Display.display page)
   >>| printf "%s"
-                    
-
 
 let () =
   let spec = Command.Spec.(
