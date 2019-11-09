@@ -1,4 +1,5 @@
 open Core
+open Async
 
 type t =
   | Error of string
@@ -6,7 +7,7 @@ type t =
   | Missing   
 
 module Environment : sig
-  val system : String.t
+  val system : String.t Deferred.t
 end
 
 module Cache : sig
@@ -15,7 +16,7 @@ module Cache : sig
   val download_location : String.t
 
   (* The timeout age of the cache *)
-  val max_age : Float.t
+  val max_age : Time.Span.t
 
   (* The directory of the cache *)
   val directory : String.t
@@ -24,7 +25,7 @@ module Cache : sig
   val get_file_path : String.t -> String.t -> String.t
 
   (* Load a page from the cache *)
-  val load_page : String.t -> String.t -> t
+  val load_page : String.t -> String.t -> t Deferred.t
 
   (* Store a page in the cache *)
   val store_page : String.t -> String.t -> String.t -> unit
@@ -36,14 +37,14 @@ module Remote : sig
 
   val get_page_url
     : ?remote: String.t ->
-    ?platform: String.t ->
+    ?platform: String.t Deferred.t ->
     String.t ->
-    String.t
+    String.t Deferred.t
 
   val get_page
     : ?remote: String.t ->
-    ?platform: String.t ->
-    String.t -> t
+    ?platform: String.t Deferred.t ->
+    String.t -> t Deferred.t
 end
 
-val get_page : String.t -> String.t -> t
+val get_page : String.t -> String.t -> t Deferred.t

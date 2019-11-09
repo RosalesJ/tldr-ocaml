@@ -1,25 +1,21 @@
 open Core
-open Lwt    
-open Cohttp    
-open Cohttp_lwt_unix
+open Async
+open Cohttp_async
 
 type t =
   | Error of string
   | Success of string
   | Missing
-  
+
 module Environment = struct
   let system =
     match Sys.os_type with
     | "Unix" ->
-      let ic = Unix.open_process_in "uname" in
-      let uname = In_channel.input_line ic in
-      let () = In_channel.close ic in
-      (match uname with
-        | Some  "Darwin" -> "osx"
-        | _  -> "linux")
-    | "Win32" -> "windows"
-    | _ -> "common"
+       (Process.run_exn ~prog:"uname" ~args:[] () >>| function
+         |"Darwin" -> "osx"
+         | _       -> "linux")
+    | "Win32"      -> return "windows"
+    | _            -> return "common"
 end
 
 module Cache = struct
@@ -32,6 +28,7 @@ module Cache = struct
   let max_age =
     Sys.getenv "TLDR_MAX_CACHE_AGE"
     |> Option.value_map ~default:24. ~f:Float.of_string
+    |> Time.Span.of_day
 
   let directory =
     let open Filename in
@@ -51,15 +48,16 @@ module Cache = struct
     let exists = file |> Fpath.v |> Bos.OS.File.exists in
     
     if use_cache && exists = Result.Ok true then
-      let last_modified = (Unix.stat file).st_mtime 
-      and cache_epoch = max_age *. 60. *. 60. *. 24. 
-      and cur_time = Unix.time () in
-      if cur_time -. last_modified > cache_epoch then
-        Missing
-      else
-        Success (In_channel.read_all file)
+      let open Time in
+      Unix.stat file
+      >>| (fun x -> x.mtime)
+      >>| (fun last_modified ->
+                   if now () > Time.add last_modified max_age then
+                     Missing
+                   else
+                     Success (In_channel.read_all file))
     else
-      Missing
+      return Missing
 
   let store_page page command platform =
     let file_path = (get_file_path command platform) in
@@ -73,32 +71,33 @@ module Remote = struct
   let default_remote = "https://raw.githubusercontent.com/tldr-pages/tldr/master/pages"
 
   let get_page_url ?(remote = default_remote) ?(platform = Environment.system) command =
-      remote ^ "/" ^ platform ^ "/" ^ command ^ ".md"
+    platform >>| fun x -> sprintf "%s/%s/%s.md" remote x command
 
   let get_page ?(remote = default_remote) ?(platform = Environment.system) command =
     let url = get_page_url ~remote:remote ~platform:platform command in
-    let request = Client.get (Uri.of_string url) >>= fun (resp , body) ->
-      let code = resp |> Response.status |> Code.code_of_status in
-      body |> Cohttp_lwt.Body.to_string >|= fun body ->
+    (url >>| Uri.of_string) >>=
+      Client.get >>=
+      fun (resp , body) ->
+      let code = resp |> Response.status |> Cohttp.Code.code_of_status in
+      body |> Cohttp_async.Body.to_string >>| fun body ->
       match code with
-      | 200 -> if Cache.use_cache then
-                 Cache.store_page body command platform;
+      | 200 -> if   Cache.use_cache
+               then Deferred.upon platform (Cache.store_page body command);
                Success body
       | 404 -> Missing
       | _   -> Error "There was an error with connection"
-    in
-    Lwt_main.run request
 end
 
 let (<|>) first second =
-  match first with
-  | Missing -> Lazy.force second
-  | x -> x
+  Deferred.join (
+  first >>| function
+  | Missing -> second
+  | x -> return x)
 
 
 let get_page command platform =
   Cache.load_page command "common"
-  <|> lazy (Cache.load_page command platform)
-  <|> lazy (Remote.get_page command ~platform:"common")
-  <|> lazy (Remote.get_page command ~platform:platform)
+  <|> Cache.load_page command platform
+  <|> Remote.get_page command ~platform:(return "common")
+  <|> Remote.get_page command ~platform:(return platform)
 

@@ -112,5 +112,4 @@ end
 let display page =
   Parser.parse page
   |> List.map ~f:Colors.color_expression
-  |> String.concat 
-  |> Printf.printf "%s"
+  |> String.concat

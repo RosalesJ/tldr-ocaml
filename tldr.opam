@@ -19,10 +19,10 @@ build: [
 depends: [
   "dune" {build}
   "core" {>= "v0.10.0"}
+  "cohttp-async"
   "ppx_jane"
+  "async_ssl"
   "bos"
-  "cohttp-lwt-unix"
-  "lwt_ssl"
   "ANSITerminal"
   "angstrom"
 ]
