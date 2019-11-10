@@ -1,1 +1,1 @@
-val display_page : String.t -> String.t -> unit Async.Deferred.t
+val display_page : String.t -> String.t -> String.t Async.Deferred.t
