@@ -10,7 +10,7 @@ let display_page command platform =
        | Missing -> no_documentation command
        | Error e -> e
        | Success page -> Display.display page)
-  
+
 let () =
   let spec = Command.Spec.(
       empty
@@ -20,4 +20,3 @@ let () =
   Command.async_spec ~summary:"tldr" spec
     (fun x () -> display_page x "Unix" >>| print_string)
   |> Command.run
-
