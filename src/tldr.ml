@@ -26,9 +26,10 @@ let () =
         in
 
         fun () ->
-          if command = [] then
+          match command with
+          | [] ->
             printf "tldr\n\nSimplified man pages\n\nUsage: tldr <command> \nFor more info run: tldr -help\n"
-          else
+          | _ :: _ ->
             let command = String.concat ~sep:"-" command in
             ignore update_cache;
             display_page command os

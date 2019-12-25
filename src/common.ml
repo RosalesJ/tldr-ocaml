@@ -49,12 +49,12 @@ module Cache = struct
   let load_page command platform =
     let file = get_file_path command platform in
     let exists = file |> Fpath.v |> Bos.OS.File.exists in
-    
-    if use_cache && exists = Result.Ok true then
-      let last_modified = (Unix.stat file).st_mtime 
-      and cache_epoch = max_age *. 60. *. 60. *. 24. 
+
+    if use_cache && Poly.(exists = Result.Ok true) then
+      let last_modified = (Unix.stat file).st_mtime
+      and cache_epoch = max_age *. 60. *. 60. *. 24.
       and cur_time = Unix.time () in
-      if cur_time -. last_modified > cache_epoch then
+      if Poly.(cur_time -. last_modified > cache_epoch) then
         Missing
       else
         Success (In_channel.read_all file)
@@ -63,8 +63,8 @@ module Cache = struct
 
   let store_page page command platform =
     let file_path = (get_file_path command platform) in
-    if directory |> Fpath.v |> Bos.OS.File.exists = Result.Ok false then
-      ignore (Bos.OS.Dir.create (directory |> Fpath.v));
+    if Poly.(=) (directory |> Fpath.v |> Bos.OS.File.exists) (Result.Ok false) then
+      ignore (Bos.OS.Dir.create (directory |> Fpath.v) : (bool, [> Rresult.R.msg ]) Stdlib.result);
     Out_channel.write_all file_path ~data:page
 end
 
