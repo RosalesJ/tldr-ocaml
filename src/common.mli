@@ -1,4 +1,4 @@
-open Core
+open Base
 
 type t =
   | Error of string

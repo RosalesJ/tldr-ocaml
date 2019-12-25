@@ -1,4 +1,4 @@
-open Core
+open Base
 
 val no_documentation : String.t -> String.t
 
