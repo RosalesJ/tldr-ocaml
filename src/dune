@@ -3,4 +3,4 @@
   (public_name tldr)
   (libraries core bos lwt cohttp
   cohttp-lwt cohttp-lwt-unix ssl ANSITerminal angstrom)
-  (preprocess (pps ppx_jane)))
+  (preprocess (pps ppx_jane lwt_ppx)))

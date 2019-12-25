@@ -23,6 +23,7 @@ depends: [
   "bos"
   "cohttp-lwt-unix"
   "lwt_ssl"
+  "lwt_ppx"
   "ANSITerminal"
   "angstrom"
 ]

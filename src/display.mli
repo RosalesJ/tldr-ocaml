@@ -2,7 +2,7 @@ module Parser : sig
   type example =
     | Command of string
     | Argument of string
-  
+
   type expression =
     | Title of string
     | Description of string
@@ -13,9 +13,9 @@ end
 
 module Colors : sig
   val color_example : Parser.example -> String.t
-  
+
   val color_expression : Parser.expression -> String.t
 end
 
-  
-val display : string -> Base.unit                                        
+
+val display : string -> Base.unit
