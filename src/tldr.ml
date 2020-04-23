@@ -18,7 +18,7 @@ let () =
   Command.basic ~summary:"tldr"
     Command.Let_syntax.(
       [%map_open
-        let update_cache = flag "--update-cache" no_arg
+        let update_cache = flag "--update" no_arg
             ~doc:"Update the cached commands"
         and os = flag "--os" (optional_with_default Environment.system string)
             ~doc:"Override the operating System [linux, osx, sunos, windows]"
