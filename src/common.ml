@@ -45,6 +45,8 @@ module Cache = struct
   (* I don't know if this actually works *)
 
   let get_file_path command platform =
+    if not (Sys.file_exists directory) then
+      Unix.mkdir directory 0o755;
     Filename.concat directory (command ^ "_" ^ platform ^ ".md")
 
 let read_all filename =
@@ -55,9 +57,9 @@ let read_all filename =
 
   let load_page command platform =
     let file = get_file_path command platform in
-    let exists = file |> Fpath.v |> Bos.OS.File.exists in
+    let exists = Sys.file_exists file in
     
-    if use_cache && exists = Result.Ok true then
+    if use_cache && exists then
       let last_modified = (Unix.stat file).st_mtime 
       and cache_epoch = max_age *. 60. *. 60. *. 24. 
       and cur_time = Unix.time () in
@@ -72,6 +74,7 @@ let read_all filename =
     let file_path = (get_file_path command platform) in
     let oc = open_out file_path in
     Printf.fprintf oc "%s" page;
+    flush oc;
     close_out oc;
 end
 

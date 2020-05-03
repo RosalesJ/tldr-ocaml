@@ -43,7 +43,7 @@ module Parser = struct
   let form = newlines *> (title <|> description <|> example) <* newlines
 
   let parse page =
-    match parse_string (many form) page ~consume:Consume.Prefix with
+    match parse_string (many form) page with
     | Ok v -> v
     | Error msg -> failwith msg
 end
