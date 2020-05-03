@@ -18,4 +18,4 @@ module Colors : sig
 end
 
   
-val display : string -> Base.unit                                        
+val display : string -> unit

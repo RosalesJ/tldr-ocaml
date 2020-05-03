@@ -1,4 +1,3 @@
-open Base
 open Lwt    
 open Cohttp    
 open Cohttp_lwt_unix
@@ -13,10 +12,10 @@ module Environment = struct
     match Sys.os_type with
     | "Unix" ->
       let ic = Unix.open_process_in "uname" in
-      let uname = In_channel.input_line ic in
-      let () = In_channel.close ic in
+      let uname = input_line ic in
+      ignore (Unix.close_process_in ic : Unix.process_status);
       (match uname with
-        | Some  "Darwin" -> "osx"
+        | "Darwin" -> "osx"
         | _  -> "linux")
     | "Win32" -> "windows"
     | _ -> "common"
@@ -26,25 +25,33 @@ module Cache = struct
   let download_location = "https://tldr-pages.github.io/assets/tldr.zip"
   
   let use_cache =
-    Sys.getenv "TLDR_CACHE_ENABLED"
-    |> Option.value_map ~default:true ~f:(function "0" -> false | _ -> true)
+    Sys.getenv_opt "TLDR_CACHE_ENABLED"
+    |> function Some "0" -> false | _ -> true
 
   let max_age =
-    Sys.getenv "TLDR_MAX_CACHE_AGE"
-    |> Option.value_map ~default:24. ~f:Float.of_string
+    Sys.getenv_opt "TLDR_MAX_CACHE_AGE"
+    |> Option.map Float.of_string_opt
+    |> Option.join
+    |> Option.value ~default:24.
 
   let directory =
     let open Filename in
-    match Sys.getenv "XDG_CACHE_HOME" with
+    match Sys.getenv_opt "XDG_CACHE_HOME" with
     | Some path -> concat path "tldr"
     | None ->
-      match Sys.getenv "HOME" with
+      match Sys.getenv_opt "HOME" with
       | Some path -> concat (concat path ".cache") "tldr"
       | None      -> concat (concat "~"  ".cache") "tldr"
-  (* I con't know if this actually works *)
+  (* I don't know if this actually works *)
 
   let get_file_path command platform =
     Filename.concat directory (command ^ "_" ^ platform ^ ".md")
+
+let read_all filename =
+    let ch = open_in filename in
+    let s = really_input_string ch (in_channel_length ch) in
+    close_in ch;
+    s
 
   let load_page command platform =
     let file = get_file_path command platform in
@@ -57,15 +64,15 @@ module Cache = struct
       if cur_time -. last_modified > cache_epoch then
         Missing
       else
-        Success (In_channel.read_all file)
+        Success (read_all file)
     else
       Missing
 
   let store_page page command platform =
     let file_path = (get_file_path command platform) in
-    if directory |> Fpath.v |> Bos.OS.File.exists = Result.Ok false then
-      ignore (Bos.OS.Dir.create (directory |> Fpath.v));
-    Out_channel.write_all file_path ~data:page
+    let oc = open_out file_path in
+    Printf.fprintf oc "%s" page;
+    close_out oc;
 end
 
 

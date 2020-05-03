@@ -1,4 +1,4 @@
-open Base
+open Core
 open Common
 
 
@@ -9,8 +9,8 @@ let display = Display.display
 
 let display_page command platform =
   match get_page command platform with
-  | Missing -> printf "%s" (no_documentation command)
-  | Error e -> printf "%s" e
+  | Missing -> Printf.printf "%s" (no_documentation command)
+  | Error e -> Printf.printf "%s" e
   | Success page -> display page
 
 

@@ -1,6 +1,5 @@
 (executable
   (name tldr)
   (public_name tldr)
-  (libraries base bos lwt cohttp
-  cohttp-lwt cohttp-lwt-unix ssl ANSITerminal angstrom)
+  (libraries core cohttp-lwt-unix ssl ANSITerminal angstrom)
   (preprocess (pps ppx_jane)))
