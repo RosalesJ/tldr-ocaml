@@ -17,5 +17,4 @@ module Colors : sig
   val color_expression : Parser.expression -> String.t
 end
 
-
-val display : string -> Base.unit
+val display : string -> unit

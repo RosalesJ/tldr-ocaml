@@ -1,4 +1,5 @@
-open Core
+open Angstrom
+open ANSITerminal
 
 module Parser = struct
   open Angstrom
@@ -73,11 +74,12 @@ module Colors = struct
     | _            -> default
 
   let color_from_environment env default =
-    let f string =
-      String.split ~on:';' string |> List.map ~f:string_of_style
+    let f string = String.split_on_char ';' string
+                   |> List.map string_of_style
     in
-    Sys.getenv env
-    |> Option.value_map ~default ~f
+    Sys.getenv_opt env
+    |> Option.map f
+    |> Option.value ~default
 
   let command_style     = color_from_environment "TLDR_COLOR_COMMAND"     [red]
   let argument_style    = color_from_environment "TLDR_COLOR_ARGUMENT"    [blue]
@@ -88,10 +90,9 @@ module Colors = struct
   let color_example =
     (* This is all to deal with underlined spaces looking weird*)
     let color x style =
-      x
-      |> String.split ~on:' '
-      |> List.map ~f:(function "" -> "" | x -> sprintf style "%s" x)
-      |> String.concat ~sep:" "
+      String.split_on_char ' ' x
+      |> List.map (function "" -> "" | x -> sprintf style "%s" x)
+      |> String.concat " "
     in
     function
     | Parser.Command command   -> color command command_style
@@ -101,16 +102,15 @@ module Colors = struct
   let color_expression = function
     | Parser.Title title        -> sprintf title_style "%s\n\n" title
     | Parser.Description descr  -> sprintf description_style "%s\n" descr
-    | Parser.Example (ex, body) -> String.concat
-                                    (List.append
-                                       (sprintf example_style "\n%s\n" ex
-                                        :: "  "
-                                        :: List.map ~f:color_example body)
-                                       ["\n"] )
+    | Parser.Example (ex, body) -> sprintf example_style "\n%s\n" ex
+                                   ^ "  "
+                                   ^ (List.map color_example body
+                                      |> String.concat "")
+                                   ^ "\n"
 end
 
 let display page =
   Parser.parse page
-  |> List.map ~f:Colors.color_expression
-  |> String.concat
+  |> List.map Colors.color_expression
+  |> String.concat ""
   |> Printf.printf "%s"

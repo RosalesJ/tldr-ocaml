@@ -1,5 +1,3 @@
-open Core
-
 type t =
   | Error of string
   | Success of string
