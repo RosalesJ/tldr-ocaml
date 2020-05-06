@@ -1,6 +1,3 @@
-open Angstrom
-open ANSITerminal
-
 module Parser = struct
   open Angstrom
 
@@ -45,12 +42,17 @@ module Parser = struct
   let form = newlines *> (title <|> description <|> example) <* newlines
 
   let parse page =
-    parse_string (many form) page |> Result.ok_or_failwith
+    parse_string (many form) page
+    |> function
+    | Ok res -> res
+    | Error err -> failwith err
 end
 
 
 module Colors = struct
   open ANSITerminal
+  open Parser
+
   let string_of_style = function
     | "black"      -> black
     | "red"        -> red
@@ -88,21 +90,20 @@ module Colors = struct
   let example_style     = color_from_environment "TLDR_COLOR_EXAMPLE"     [green]
 
   let color_example =
-    (* This is all to deal with underlined spaces looking weird*)
+    (* This is all to deal with underlined spaces looking weird *)
     let color x style =
       String.split_on_char ' ' x
       |> List.map (function "" -> "" | x -> sprintf style "%s" x)
       |> String.concat " "
     in
     function
-    | Parser.Command command   -> color command command_style
-    | Parser.Argument argument -> color argument argument_style
-
+    | Command cmd   -> color cmd command_style
+    | Argument arg  -> color arg argument_style
 
   let color_expression = function
-    | Parser.Title title        -> sprintf title_style "%s\n\n" title
-    | Parser.Description descr  -> sprintf description_style "%s\n" descr
-    | Parser.Example (ex, body) -> sprintf example_style "\n%s\n" ex
+    | Title title        -> sprintf title_style "%s\n\n" title
+    | Description descr  -> sprintf description_style "%s\n" descr
+    | Example (ex, body) -> sprintf example_style "\n%s\n" ex
                                    ^ "  "
                                    ^ (List.map color_example body
                                       |> String.concat "")

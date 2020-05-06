@@ -1,7 +1,3 @@
-open Lwt
-open Cohttp
-open Cohttp_lwt_unix
-
 type t =
   | Error of string
   | Success of string
@@ -48,7 +44,7 @@ module Cache = struct
   let get_file_path command platform =
     if not (Sys.file_exists directory) then
       Unix.mkdir directory 0o755;
-    Filename.concat directory (String.concat [command; "_"; platform; ".md"])
+    Filename.concat directory (String.concat "" [command; "_"; platform; ".md"])
 
 let read_all filename =
     let ch = open_in filename in
@@ -64,7 +60,7 @@ let read_all filename =
       let last_modified = (Unix.stat file).st_mtime
       and cache_epoch = max_age *. 60. *. 60. *. 24.
       and cur_time = Unix.time () in
-      if Poly.(cur_time -. last_modified > cache_epoch) then
+      if cur_time -. last_modified > cache_epoch then
         Missing
       else
         Success (read_all file)
@@ -88,12 +84,12 @@ module Remote = struct
   let default_remote = "https://raw.githubusercontent.com/tldr-pages/tldr/master/pages"
 
   let get_page_url ?(remote = default_remote) ?(platform = Environment.system) command =
-    String.concat [remote; "/"; platform; "/"; command; ".md"]
+    String.concat "" [remote; "/"; platform; "/"; command; ".md"]
 
   let get_page ?(remote = default_remote) ?(platform = Environment.system) command =
     let url = get_page_url ~remote ~platform command in
     let request =
-      let%lwt (resp, body) = Client.get (Uri.of_string url) in
+      Client.get (Uri.of_string url) >>= fun (resp, body) ->
       let code             = resp |> Response.status |> Code.code_of_status in
       body |> Cohttp_lwt.Body.to_string >|= fun body ->
       match code with
