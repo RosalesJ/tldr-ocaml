@@ -42,7 +42,7 @@ module Parser = struct
   let form = newlines *> (title <|> description <|> example) <* newlines
 
   let parse page =
-    parse_string (many form) page
+    parse_string (many form) page ~consume:Consume.Prefix
     |> function
     | Ok res -> res
     | Error err -> failwith err
