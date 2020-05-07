@@ -18,12 +18,8 @@ build: [
 
 depends: [
   "dune" {build}
-  "core" {>= "v0.10.0"}
-  "ppx_jane"
-  "bos"
   "cohttp-lwt-unix"
   "lwt_ssl"
-  "lwt_ppx"
   "ANSITerminal"
   "angstrom"
 ]
