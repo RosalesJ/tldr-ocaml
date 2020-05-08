@@ -1,3 +1,5 @@
+open Base
+
 type t =
   | Error of string
   | Success of string
@@ -7,10 +9,10 @@ module Environment = struct
   let system =
     match Sys.os_type with
     | "Unix" ->
-      let ic = Unix.open_process_in "uname" in
-      let uname = input_line ic in
-      ignore (Unix.close_process_in ic : Unix.process_status);
-      (match uname with
+       let ic = Unix.open_process_in "uname" in
+       let uname = Stdio.In_channel.input_line_exn ic in
+       ignore (Unix.close_process_in ic : Unix.process_status);
+       (match uname with
         | "Darwin" -> "osx"
         | _  -> "linux")
     | "Win32" -> "windows"
@@ -18,49 +20,43 @@ module Environment = struct
 end
 
 module Cache = struct
-
+  open Stdlib.Filename
   let download_location = "https://tldr-pages.github.io/assets/tldr.zip"
 
   let use_cache =
-    Sys.getenv_opt "TLDR_CACHE_ENABLED"
+    Sys.getenv "TLDR_CACHE_ENABLED"
     |> function Some "0" -> false | _ -> true
 
   let max_age =
-    Sys.getenv_opt "TLDR_MAX_CACHE_AGE"
-    |> Option.map Float.of_string_opt
-    |> Option.join
-    |> Option.value ~default:24.
+    Sys.getenv "TLDR_MAX_CACHE_AGE"
+    |> Option.value_map ~f:Float.of_string ~default:24.
 
   let directory =
-    let open Filename in
-    match Sys.getenv_opt "XDG_CACHE_HOME" with
+    match Sys.getenv "XDG_CACHE_HOME" with
     | Some path -> concat path "tldr"
     | None ->
-      match Sys.getenv_opt "HOME" with
+      match Sys.getenv "HOME" with
       | Some path -> concat (concat path ".cache") "tldr"
       | None      -> concat (concat "~"  ".cache") "tldr"
   (* I don't know if this actually works *)
 
   let get_file_path command platform =
-    if not (Sys.file_exists directory) then
+    if not (Caml.Sys.file_exists directory) then
       Unix.mkdir directory 0o755;
-    Filename.concat directory (String.concat "" [command; "_"; platform; ".md"])
+    concat directory (String.concat ~sep:"" [command; "_"; platform; ".md"])
 
-let read_all filename =
-    let ch = open_in filename in
-    let s = really_input_string ch (in_channel_length ch) in
-    close_in ch;
-    s
+  let read_all filename =
+    Stdio.In_channel.read_all filename
 
   let load_page command platform =
     let file = get_file_path command platform in
-    let exists = Sys.file_exists file in
+    let exists = Caml.Sys.file_exists file in
 
     if use_cache && exists then
       let last_modified = (Unix.stat file).st_mtime
       and cache_epoch = max_age *. 60. *. 60. *. 24.
       and cur_time = Unix.time () in
-      if cur_time -. last_modified > cache_epoch then
+      if Poly.(cur_time -. last_modified > cache_epoch) then
         Missing
       else
         Success (read_all file)
@@ -68,11 +64,12 @@ let read_all filename =
       Missing
 
   let store_page page command platform =
+    let open Stdio.Out_channel in
     let file_path = (get_file_path command platform) in
-    let oc = open_out file_path in
-    Printf.fprintf oc "%s" page;
+    let oc = create file_path in
+    fprintf oc "%s" page;
     flush oc;
-    close_out oc;
+    close oc;
 end
 
 
@@ -84,7 +81,7 @@ module Remote = struct
   let default_remote = "https://raw.githubusercontent.com/tldr-pages/tldr/master/pages"
 
   let get_page_url ?(remote = default_remote) ?(platform = Environment.system) command =
-    String.concat "" [remote; "/"; platform; "/"; command; ".md"]
+    String.concat ~sep:"" [remote; "/"; platform; "/"; command; ".md"]
 
   let get_page ?(remote = default_remote) ?(platform = Environment.system) command =
     let url = get_page_url ~remote ~platform command in

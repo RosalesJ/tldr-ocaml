@@ -1,3 +1,5 @@
+open Base
+
 type t =
   | Error of string
   | Success of string

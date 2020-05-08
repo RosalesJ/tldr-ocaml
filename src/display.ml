@@ -1,3 +1,5 @@
+open Base
+
 module Parser = struct
   open Angstrom
 
@@ -76,12 +78,11 @@ module Colors = struct
     | _            -> default
 
   let color_from_environment env default =
-    let f string = String.split_on_char ';' string
-                   |> List.map string_of_style
+    let f string = String.split ~on:';' string
+                   |> List.map ~f:string_of_style
     in
-    Sys.getenv_opt env
-    |> Option.map f
-    |> Option.value ~default
+    Sys.getenv env
+    |> Option.value_map ~f ~default
 
   let command_style     = color_from_environment "TLDR_COLOR_COMMAND"     [red]
   let argument_style    = color_from_environment "TLDR_COLOR_ARGUMENT"    [blue]
@@ -92,9 +93,9 @@ module Colors = struct
   let color_example =
     (* This is all to deal with underlined spaces looking weird *)
     let color x style =
-      String.split_on_char ' ' x
-      |> List.map (function "" -> "" | x -> sprintf style "%s" x)
-      |> String.concat " "
+      String.split ~on:' ' x
+      |> List.map ~f:(function "" -> "" | x -> sprintf style "%s" x)
+      |> String.concat ~sep:" "
     in
     function
     | Command cmd   -> color cmd command_style
@@ -105,13 +106,13 @@ module Colors = struct
     | Description descr  -> sprintf description_style "%s\n" descr
     | Example (ex, body) -> sprintf example_style "\n%s\n" ex
                                    ^ "  "
-                                   ^ (List.map color_example body
-                                      |> String.concat "")
+                                   ^ (List.map ~f:color_example body
+                                      |> String.concat)
                                    ^ "\n"
 end
 
 let display page =
   Parser.parse page
-  |> List.map Colors.color_expression
-  |> String.concat ""
-  |> Printf.printf "%s"
+  |> List.map ~f:Colors.color_expression
+  |> String.concat
+  |> Stdio.printf "%s"
