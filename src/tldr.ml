@@ -5,7 +5,7 @@ open Common
 let no_documentation =
   Printf.sprintf "`%s` documentation is not available. \n Consider contributing Pull Request to https://github.com/tldr-pages/tldr\n"
 
-let usage_message = Printf.sprintf "%s: %s\n\n%s"
+let usage_message = Printf.sprintf "%s - %s\n\n%s"
     "tldr"
     "Simplified man pages"
     "Usage: tldr <command>"
