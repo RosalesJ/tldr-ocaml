@@ -41,7 +41,7 @@ let () =
     let doc = "Simplified man pages" in
     let man = [
       `S Manpage.s_bugs;
-      `P "Email bug reports to <coby@case.edu>." ]
+      `P "Email bug reports to <rosaleschase.j@gmail.com>." ]
     in
     info "tldr" ~version:"0.3.0" ~doc ~man
   in
