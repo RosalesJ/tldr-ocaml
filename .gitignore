@@ -1,5 +1,3 @@
 .merlin
 _build
 *.install
-tldr-python-client
-tldr

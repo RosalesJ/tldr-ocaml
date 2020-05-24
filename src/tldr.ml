@@ -43,7 +43,7 @@ let () =
       `S Manpage.s_bugs;
       `P "Email bug reports to <coby@case.edu>." ]
     in
-    info "tldr" ~version:"0.2" ~doc ~man
+    info "tldr" ~version:"0.3.0" ~doc ~man
   in
 
   let run_t = const display_page
