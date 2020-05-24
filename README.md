@@ -3,7 +3,7 @@
 
 A client for [tldr](https://github.com/tldr-pages/tldr) written in ```ocaml```.
 
-![tldr screenshot](screenshot.png)
+<img src="screenshot.png" width="650">
 
 ## Installation
 Install from opam with:
