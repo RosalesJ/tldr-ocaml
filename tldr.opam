@@ -17,10 +17,10 @@ build: [
 ]
 
 depends: [
-  "dune" {build}
+  "dune" {>= "1.2"}
   "cohttp-lwt-unix"
   "lwt_ssl"
   "ANSITerminal"
-  "angstrom"
+  "angstrom" {>= "0.14.0"}
 ]
 conflicts: [ "ssl" {= "0.5.6"} ]
