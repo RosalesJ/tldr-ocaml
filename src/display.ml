@@ -104,11 +104,8 @@ module Colors = struct
   let color_expression = function
     | Title title        -> sprintf title_style "%s\n\n" title
     | Description descr  -> sprintf description_style "%s\n" descr
-    | Example (ex, body) -> sprintf example_style "\n%s\n" ex
-                                   ^ "  "
-                                   ^ (List.map ~f:color_example body
-                                      |> String.concat)
-                                   ^ "\n"
+    | Example (ex, body) -> sprintf example_style "\n%s\n  \n" ex
+                              (List.map ~f:color_example body |> String.concat)
 end
 
 let display page =
