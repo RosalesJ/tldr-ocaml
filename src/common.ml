@@ -78,7 +78,7 @@ module Remote = struct
   open Cohttp
   open Cohttp_lwt_unix
 
-  let default_remote = "https://raw.githubusercontent.com/tldr-pages/tldr/master/pages"
+  let default_remote = "https://raw.githubusercontent.com/tldr-pages/tldr/main/pages"
 
   let get_page_url ?(remote = default_remote) ?(platform = Environment.system) command =
     String.concat ~sep:"" [remote; "/"; platform; "/"; command; ".md"]
